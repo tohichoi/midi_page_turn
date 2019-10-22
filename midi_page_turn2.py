@@ -123,7 +123,7 @@ def midi_page_turn():
 				# control message
 				# 0b1011CCCC : 1011 : control, CCCC: channel
 				# print('{:b}'.format(st & 0b10110000))
-				if (st >> 4 & 0b1011) is not 0b1011:
+				if st >> 4 is not 0b1011:
 					continue
 
 				if cc not in ccdata.keys():
