@@ -1,3 +1,6 @@
+#
+# https://www.reddit.com/r/PowerShell/comments/7vg6jq/updatedsendkeyps1/
+#
 # Usage:
 # Character:
 # .\Send-KeyPress.ps1 -Char 'A'
