@@ -9,9 +9,21 @@ from yaspin.spinners import Spinners
 import platform
 from packaging import version
 
-
 def is_windows():
     return platform.system() == 'Windows'
+
+
+LEFT_PEDAL = 67
+MID_PEDAL = 66
+VK_LEFT = '0x25' if is_windows() else 'Left'
+VK_RIGHT = '0x27' if is_windows() else 'Right'
+VK_UP = '0x26' if is_windows() else 'Page_Up'
+VK_DOWN = '0x28' if is_windows() else 'Page_Down'
+
+# control code : sendkey at that time, keytype
+# LEFT-MOST Pedal is more comfortable for NEXT page.
+CCDATA = {LEFT_PEDAL: [True, VK_DOWN], MID_PEDAL: [True, VK_UP]}
+
 
 
 def sendkey(vkcode):
@@ -21,7 +33,7 @@ def sendkey(vkcode):
         subprocess.check_call(['xdotool', 'windowactivate', '--sync', WINDOW, 'key', vkcode])
 
 
-def midi_page_turn():
+def get_port_from_user():
     inputdevice = {}
     outputdevice = {}
 
@@ -92,16 +104,8 @@ def midi_page_turn():
 
     # inport=1
 
-    LEFT_PEDAL = 67
-    MID_PEDAL = 66
-    VK_LEFT = '0x25' if is_windows() else 'Left'
-    VK_RIGHT = '0x27' if is_windows() else 'Right'
-    VK_UP = '0x26' if is_windows() else 'Page_Up'
-    VK_DOWN = '0x28' if is_windows() else 'Page_Down'
 
-    # control code : sendkey at that time, keytype
-    # LEFT-MOST Pedal is more comfortable for NEXT page.
-    ccdata = {LEFT_PEDAL: [True, VK_DOWN], MID_PEDAL: [True, VK_UP]}
+def midi_page_turn(inport):
 
     try:
         # spinner=yaspin(Spinners.bouncingBall, color="blue", on_color="on_yellow",)
@@ -135,19 +139,19 @@ def midi_page_turn():
                 # control message
                 # 0b1011CCCC : 1011 : control, CCCC: channel
                 # print('{:b}'.format(st & 0b10110000))
-                if st >> 4 is not 0b1011:
+                if st >> 4 != 0b1011:
                     continue
 
-                if cc not in ccdata.keys():
+                if cc not in CCDATA.keys():
                     break
 
                 # print(d)
 
                 # print(f'ControlCode : {cc}, Value: {val}')
                 if val > 0:
-                    if ccdata[cc][0]:
-                        sendkey(ccdata[cc][1])
-                        ccdata[cc][0] = False
+                    if CCDATA[cc][0]:
+                        sendkey(CCDATA[cc][1])
+                        CCDATA[cc][0] = False
                         # print('-'*20)
                         # print('')
                         # spinner.stop()
@@ -157,7 +161,7 @@ def midi_page_turn():
                     # spinner.ok('✔')
                     # print('-'*20)
                 else:  # val is zero (means end of control message)
-                    ccdata[cc][0] = True
+                    CCDATA[cc][0] = True
     finally:
         print("\nClosing ... ", end='')
         # sleep(1)
@@ -178,4 +182,7 @@ if not is_windows():
     output = subprocess.check_output(['xdotool', 'selectwindow'])
     WINDOW = output.decode('utf-8').strip()
 
-midi_page_turn()
+
+if __name__ == "__main__":
+    inport = get_port_from_user()
+    midi_page_turn(inport)
