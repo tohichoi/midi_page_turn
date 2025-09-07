@@ -1,12 +1,47 @@
-#main_vertical {
-    padding-left: 2;
-    padding-right: 2;
-    padding-bottom: 2;
+# containers
+
+#main_container {
+    margin: 1;
+    # padding-left: 2;
+    # padding-right: 2;
+    # padding-bottom: 2;
+    height: 100%;
+    width: 100%;
+    align: center top;
+    # border: solid white;
 }
+
+#midi_devices_container {
+    width: 100%;
+    # height: 20;
+    # margin-top: 1;
+    # margin-bottom: 1;
+    align: center middle;
+    # border: solid white;
+}
+
+#midi_events_container {
+    width: 100%;
+    # height: 20;
+    # margin-top: 1;
+    # margin-bottom: 1;
+    align: center middle;
+    # border: solid white;
+}
+
+#turn_event_container {
+    width: 100%;
+    height: 5;
+    # margin-top: 1;
+    # margin-bottom: 1;
+    align: center middle;
+    # border: solid white;
+}
+
 
 Sparkline {
     width: 100%;
-    # height: 3;
+    height: 3;
     # margin-left: 2;
     # margin-right: 2;
 #    border: heavy white;
@@ -18,7 +53,7 @@ Digits {
     # margin-left: 2;
 #    margin: 2;
  #  border: heavy white;
-    text-align:right;
+    text-align:center;
  #   background: $accent;
  #   color: $text;
     color: $foreground-muted;
@@ -26,23 +61,23 @@ Digits {
 
 Label {
     width: 100%;
-#    height: 3;
-    margin-top: 2;
+    margin-top: 1;
     text-align: center;
- #   background: $accent;
- #   color: $text;
 }
 
 Label#midi_label {
-    # height: 3;
-    # background: $accent;
-    # color: $accent;
+    height: 3;
     text-align: center;
+}
+
+#midi_legend_container {
+    height: 1;
+    background: $foreground-muted;
 }
 
 Static.legend {
     # width: 50%;
-    # height: 3;
+    height: 1;
     # margin-left: 2;
     # margin-right: 2;
     # text-align: center;
@@ -52,9 +87,21 @@ Static.legend {
 Static#midi_legend_min {
     width: 50%;
     text-align: left;
+    # color: $text-dark;
 }
 
 Static#midi_legend_max {
     width: 50%;
     text-align: right;
+}
+
+Static.turn_style {
+    width: 30%;
+    text-align: center;
+    color: $text-muted;
+    border: solid white;
+}
+
+Static#turn_prev{
+    # background: blue;
 }
