@@ -105,3 +105,11 @@ Static.turn_style {
 Static#turn_prev{
     # background: blue;
 }
+
+.red-row {
+    background: red;
+}
+
+.green-row {
+    background: green;
+}

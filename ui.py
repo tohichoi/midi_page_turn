@@ -101,7 +101,7 @@ class MidiPageTurnApp(App):
         self.table = DataTable()
         self.table.add_columns("ID", "TYPE", "NAME", "STATUS")
         self.table.cursor_type = "row"
-        self.table.zebra_stripes = True
+        # self.table.zebra_stripes = True
         self.table.focus()
         self.table.show_header = True
 
@@ -164,7 +164,7 @@ class MidiPageTurnApp(App):
             self.query_one("#turn_next", Static).styles.background = "black"
             self.query_one("#turn_prev", Static).styles.background = "black"
             
-        self.set_interval(1, lambda: self.update_turn_status(None), pause=True)
+        self.set_interval(1, lambda: self.update_turn_status(None), pause=False)
         
     async def on_key(self, event: events.Key) -> None:
         # Check if the table is focused and Space is pressed
@@ -192,23 +192,24 @@ class MidiPageTurnApp(App):
             inport = row_data[0]
             
             # check if the selected device is an input device
-            if row_data[1] not in ("IN", "IN/OUT"):
+            if row_data[1].plain not in ("IN", "IN/OUT"):
                 inport = None
                 raise Exception({"message": f"Selected device is not an input device: {row_data[2]}", "servity": "error"})
             
             # check if the selected device is already opened
-            if row_data[3] == "OPENED":
+            self.log(f'Row status: {row_data[3].plain}')
+            if row_data[3].plain == "OPENED":
                 inport = None
                 time_display.stop()
                 time_display.reset()
                 self.worker.cancel()
-                self.table.update_cell_at((row, 3), "CLOSED")
+                self.table.update_cell_at((row, 3), self.get_bool_text("CLOSED", False))
                 raise Exception({"message": "Device closed", "servity": "information"})
             else:
                 self.log(f"Selected MIDI input port: {inport}")
                 label.update(f"🎹 Receiving MIDI Input Events {row_data[2]} (port {inport})")
                 self.notify(f"Listening MIDI events ... ", severity="information")
-                self.table.update_cell_at((row, 3), "OPENED")
+                self.table.update_cell_at((row, 3), self.get_bool_text("OPENED", True))
                 time_display.start()
         except Exception as e:
             self.log(e.args[0]['message'])
@@ -314,7 +315,19 @@ class MidiPageTurnApp(App):
                 midi_in.close()
             pygame.midi.quit()
             
-            
+    # Assume this code is inside a Textual App or Widget
+    def get_bool_text(self, value, is_true):
+        # self.log(f'Styles: {self.theme_variables}')
+        primary_color = self.theme_variables["text-success"]
+        disabled_text_color = self.theme_variables["text-error"]
+
+        if is_true:
+            style = f"bold {primary_color}"
+        else:
+            style = disabled_text_color
+        
+        return Text(value, style=style)
+    
     def read_available_devices(self):
         self.init_midi()
         
@@ -328,8 +341,10 @@ class MidiPageTurnApp(App):
                 typestr = "IN"
             elif ret[3]:
                 typestr = "OUT"
-            status = Text("OPENED", style="$text-success") if ret[4] else Text("CLOSED", style="$text-muted") 
-            name = ret[1].decode("utf-8")
+            status = "CLOSED" if ret[4] == 0 else "OPENED"
+            status = self.get_bool_text(status, status == 'OPENED')
+            typestr = self.get_bool_text(typestr, 'IN' in typestr)
+            name = self.get_bool_text(ret[1].decode("utf-8"), 'IN' in typestr)
             self.table.add_row(i, typestr, name, status, key=str(i))
             
     async def on_mount(self) -> None:
